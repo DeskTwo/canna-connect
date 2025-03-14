@@ -1,35 +1,54 @@
 "use client";
 import { useState } from "react";
-import { registerUser, loginUser, getUserProfile } from "../lib/api";
+import { registerUser, loginUser, getUserProfile, logoutUser } from "../lib/api";
 
 export default function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("PATIENT");
-  const [token, setToken] = useState("");
   const [userInfo, setUserInfo] = useState(null);
 
   const handleRegister = async () => {
     const result = await registerUser(email, password, role);
-    console.log("Registered:", result);
+    
   };
 
   const handleLogin = async () => {
     const result = await loginUser(email, password);
-    console.log("Logged in:", result);
-    if (result.access_token) setToken(result.access_token);
+    
+    fetchProfile(); // 🚀 Hier sicherstellen, dass es nach Login ausgeführt wird
+  };
+  
+  
+
+  const handleLogout = async () => { // 🟢 Logout-Funktion
+    const result = await logoutUser();
+    
+    setUserInfo(null);
   };
 
   const fetchProfile = async () => {
-    const profile = await getUserProfile(token);
-    console.log("Profile:", profile);
-    setUserInfo(profile);
+    console.log("🔍 fetchProfile() wurde aufgerufen!"); // 🟢 Debugging
+    const profile = await getUserProfile();
+    console.log("📡 Profile API Response:", profile);
+  
+    if (profile && profile.email) {
+      setUserInfo(profile);
+      console.log("✅ userInfo gesetzt:", profile);
+    } else {
+      console.warn("⚠️ Kein User-Profil erhalten!");
+    }
   };
+  
+  
+  
+  
+  
 
   return (
     <div style={{ padding: 20 }}>
       <h1>Login & Registrierung</h1>
-      
+
       <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
       <input type="password" placeholder="Passwort" value={password} onChange={(e) => setPassword(e.target.value)} />
 
@@ -42,11 +61,10 @@ export default function AuthPage() {
       <button onClick={handleRegister}>Registrieren</button>
       <button onClick={handleLogin}>Einloggen</button>
 
-      {token && (
+      {userInfo && (
         <>
-          <p>Token: {token}</p>
-          <button onClick={fetchProfile}>Profil abrufen</button>
-          {userInfo && <pre>{JSON.stringify(userInfo, null, 2)}</pre>}
+          <button onClick={handleLogout}>Logout</button> {/* 🟢 Logout-Button */}
+          <pre>{JSON.stringify(userInfo, null, 2)}</pre>
         </>
       )}
     </div>

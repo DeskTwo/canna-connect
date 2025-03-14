@@ -1,17 +1,33 @@
-import { Controller, Post, Body, UnauthorizedException } from '@nestjs/common';
+import { Controller, Post, Body, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
+import { Response } from 'express'; // 🟢 NEU: Response-Objekt importieren
+import { UnauthorizedException } from "@nestjs/common";
+import { LoginDto } from "./dto/login.dto";  // Falls `LoginDto` noch fehlt
+
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private authService: AuthService) {}
 
-  @Post('login')
-  async login(@Body() { email, password }: { email: string; password: string }) {
-    const user = await this.authService.validateUser(email, password);
-    if (!user) {
-      throw new UnauthorizedException('Ungültige Anmeldedaten');
-    }
-    return this.authService.login(user);
-  }
+  @Post("login")
+async login(
+  @Body() loginDto: LoginDto,
+  @Res({ passthrough: true }) response: Response
+) {
+  const user = await this.authService.validateUser(loginDto.email, loginDto.password);
+  if (!user) throw new UnauthorizedException();
+
+  await this.authService.login(user, response);
+
+  return { message: "Login erfolgreich" };  // ❗ KEIN Token mehr zurückgeben
 }
 
+  
+
+@Post('logout')
+async logout(@Res({ passthrough: true }) response: Response) {
+  response.clearCookie('jwt'); // 🟢 JWT-Cookie im Browser löschen
+  return { message: 'Logout erfolgreich' };
+}
+
+}
