@@ -1,14 +1,15 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { PrismaService } from '../prisma.service';
-import { JwtModule } from '@nestjs/jwt';  // ✅ JWT-Modul importieren
-import { AuthModule } from '../auth/auth.module';  // ✅ Auth-Module importieren
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
-  imports: [JwtModule.register({}), AuthModule],
+  imports: [
+    forwardRef(() => AuthModule), // Verhindert die zirkuläre Abhängigkeit
+  ],
   controllers: [UsersController],
   providers: [UsersService, PrismaService],
+  exports: [UsersService],
 })
 export class UsersModule {}
-

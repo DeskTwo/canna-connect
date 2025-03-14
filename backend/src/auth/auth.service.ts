@@ -24,9 +24,12 @@ export class AuthService {
 
   async login(user: any) {
     const payload = { email: user.email, sub: user.id, role: user.role };
+    
+    // Debugging: JWT_SECRET im Login überprüfen
+    console.log("AuthService JWT_SECRET:", process.env.JWT_SECRET);
+
     return {
       access_token: this.jwtService.sign(payload),
     };
   }
 }
-
