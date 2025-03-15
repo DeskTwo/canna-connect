@@ -3,12 +3,13 @@ import { AuthService } from './auth.service';
 import { Response } from 'express'; // 🟢 NEU: Response-Objekt importieren
 import { UnauthorizedException } from "@nestjs/common";
 import { LoginDto } from "./dto/login.dto";  // Falls `LoginDto` noch fehlt
-
+import { Public } from './decorators/public.decorator'; // 👈 Import hinzufügen
 
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  @Public() // 👈 Login als public markieren
   @Post("login")
 async login(
   @Body() loginDto: LoginDto,
